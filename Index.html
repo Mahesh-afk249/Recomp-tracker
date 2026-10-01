@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Recomp" />
+  <meta name="theme-color" content="#090B10" />
+  <title>Recomp Pro Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #090B10;
+      --surface: #121620;
+      --surface-card: #181E2B;
+      --surface-elevated: #202739;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(16, 185, 129, 0.35);
+      
+      --accent: #10B981;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+      --accent-secondary: #06B6D4;
+      
+      --text: #F9FAFB;
+      --text-muted: #94A3B8;
+      --text-sub: #64748B;
+      
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-full: 9999px;
+      
+      --safe-top: env(safe-area-inset-top, 20px);
+      --safe-bottom: env(safe-area-inset-bottom, 20px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-top: calc(var(--safe-top) + 16px);
+      padding-bottom: calc(var(--safe-bottom) + 90px);
+    }
+
+    /* Splash Screen */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #141A28 0%, #080A0E 100%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #splash-screen.fade-out {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .splash-logo {
+      width: 86px;
+      height: 86px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 50px var(--accent-glow);
+      animation: pulseGlow 2s infinite alternate ease-in-out;
+    }
+
+    .splash-logo svg {
+      width: 44px;
+      height: 44px;
+      fill: #090B10;
+    }
+
+    .splash-title {
+      margin-top: 18px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .splash-tagline {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 6px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.96); box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
+      100% { transform: scale(1.02); box-shadow: 0 0 60px rgba(16, 185, 129, 0.45); }
+    }
+
+    /* Layout Containers */
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #090B10;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent);
+      border: 1px solid var(--border-accent);
+    }
+
+    /* Metric Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    .kpi-val {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #FFF;
+      margin-bottom: 2px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* Views & Sections */
+    .view-content {
+      display: none;
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .view-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: var(--text);
+    }
+
+    /* Input Controls */
+    .input-field-group {
+      margin-bottom: 14px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-box {
+      width: 100%;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+      -webkit-appearance: none;
+    }
+
+    .input-box:focus {
+      border-color: var(--accent);
+      background: var(--surface-elevated);
+    }
+
+    /* Quick Presets */
+    .preset-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-preset {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:active {
+      transform: scale(0.96);
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #051B11;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px var(--accent-glow);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .primary-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    /* Split Filter Tabs */
+    .day-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+
+    .day-selector::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .day-chip.active {
+      background: var(--accent);
+      color: #061A12;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Workout List */
+    .exercise-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s ease;
+    }
+
+    .exercise-card:active {
+      background: var(--surface-elevated);
+    }
+
+    .exercise-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFF;
+      margin-bottom: 3px;
+    }
+
+    .exercise-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .rest-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--border-accent);
+      padding: 5px 9px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    /* Bottom Navigation Bar */
+    .dock-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(14, 18, 27, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 10px 24px calc(var(--safe-bottom) + 8px);
+      display: flex;
+      justify-content: space-around;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.15s ease;
+    }
+
+    .nav-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .nav-btn span {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .nav-btn.active {
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <div class="splash-logo">
+      <svg viewBox="0 0 24 24">
+        <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+      </svg>
+    </div>
+    <div class="splash-title">RECOMP ENGINE</div>
+    <div class="splash-tagline">Nutrition & Hypertrophy System</div>
+  </div>
+
+  <div class="app-container">
+    <header>
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">Dashboard</div>
+          <div class="brand-subtitle" id="current-date">Today</div>
+        </div>
+      </div>
+      <div class="status-badge" id="workout-day-badge">Push A</div>
+    </header>
+
+    <!-- Metrics -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-val" id="disp-calories">0</div>
+        <div class="kpi-label">Calories (kcal)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" id="disp-protein">0g</div>
+        <div class="kpi-label">Protein (g)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" id="disp-water">0.0L</div>
+        <div class="kpi-label">Water (L)</div>
+      </div>
+    </div>
+
+    <!-- View: Dashboard / Log -->
+    <div id="view-dashboard" class="view-content active">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Quick Log Entry</div>
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-label">Water Intake (Liters)</label>
+          <input type="number" id="in-water" class="input-box" placeholder="Add Liters" step="0.25">
+          <div class="preset-group">
+            <button class="btn-preset" onclick="addWater(0.25)">+250ml</button>
+            <button class="btn-preset" onclick="addWater(0.50)">+500ml</button>
+            <button class="btn-preset" onclick="addWater(0.75)">+750ml</button>
+            <button class="btn-preset" onclick="addWater(1.00)">+1.0L</button>
+          </div>
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-label">Calories Consumed (kcal)</label>
+          <input type="number" id="in-cal" class="input-box" placeholder="e.g. 650">
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-label">Protein Consumed (g)</label>
+          <input type="number" id="in-pro" class="input-box" placeholder="e.g. 40">
+          <div class="preset-group">
+            <button class="btn-preset" onclick="addProtein(25)">+25g Shake</button>
+            <button class="btn-preset" onclick="addProtein(35)">+35g Meal</button>
+            <button class="btn-preset" onclick="addProtein(50)">+50g Heavy</button>
+            <button class="btn-preset" onclick="resetMacros()">Reset</button>
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="saveDay()">
+          Save & Log Entry
+        </button>
+      </div>
+    </div>
+
+    <!-- View: Workouts -->
+    <div id="view-workouts" class="view-content">
+      <div class="day-selector">
+        <button class="day-chip active" onclick="switchSplit('pushA', this)">Push A</button>
+        <button class="day-chip" onclick="switchSplit('pullA', this)">Pull A</button>
+        <button class="day-chip" onclick="switchSplit('legsA', this)">Legs A</button>
+        <button class="day-chip" onclick="switchSplit('pushB', this)">Push B</button>
+        <button class="day-chip" onclick="switchSplit('pullB', this)">Pull B</button>
+        <button class="day-chip" onclick="switchSplit('legsB', this)">Legs B</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title" id="split-title">Push A — Chest & Triceps Focus</div>
+        </div>
+        <div id="exercise-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dock Navigation -->
+  <nav class="dock-nav">
+    <button class="nav-btn active" onclick="navigate('dashboard', this)">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+      </svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('workouts', this)">
+      <svg viewBox="0 0 24 24">
+        <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+      </svg>
+      <span>Workouts</span>
+    </button>
+  </nav>
+
+  <script>
+    // Splash screen handler
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.style.display = 'none', 600);
+      }, 1000);
+
+      const options = { weekday: 'short', month: 'short', day: 'numeric' };
+      document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', options);
+      loadPersistedData();
+      renderWorkout('pushA');
+    });
+
+    // Workout Database
+    const workoutDatabase = {
+      pushA: {
+        title: "Push A — Chest, Delts & Triceps",
+        exercises: [
+          { name: "Barbell Bench Press", sets: "3 sets × 6-8 reps", rest: "2 min" },
+          { name: "Incline DB Press", sets: "3 sets × 8-10 reps", rest: "90 sec" },
+          { name: "Standing Overhead Press", sets: "3 sets × 8-10 reps", rest: "90 sec" },
+          { name: "Dumbbell Lateral Raises", sets: "4 sets × 12-15 reps", rest: "60 sec" },
+          { name: "Cable Tricep Pushdowns", sets: "3 sets × 12 reps", rest: "60 sec" }
+        ]
+      },
+      pullA: {
+        title: "Pull A — Vertical Pull & Biceps",
+        exercises: [
+          { name: "Lat Pulldown / Pullups", sets: "3 sets × 8-10 reps", rest: "2 min" },
+          { name: "Seated Cable Rows", sets: "3 sets × 10 reps", rest: "90 sec" },
+          { name: "Single-Arm Dumbbell Row", sets: "3 sets × 12 reps", rest: "60 sec" },
+          { name: "Rope Face Pulls", sets: "4 sets × 15 reps", rest: "60 sec" },
+          { name: "Incline Dumbbell Curl", sets: "3 sets × 12 reps", rest: "60 sec" }
+        ]
+      },
+      legsA: {
+        title: "Legs A — Quad Dominant & Calves",
+        exercises: [
+          { name: "Barbell Back Squats", sets: "3 sets × 6-8 reps", rest: "2.5 min" },
+          { name: "Romanian Deadlifts", sets: "3 sets × 10 reps", rest: "2 min" },
+          { name: "Leg Press", sets: "3 sets × 12 reps", rest: "90 sec" },
+          { name: "Lying Leg Curls", sets: "3 sets × 15 reps", rest: "60 sec" },
+          { name: "Standing Calf Raises", sets: "4 sets × 15 reps", rest: "45 sec" }
+        ]
+      },
+      pushB: {
+        title: "Push B — Upper Chest & Shoulder Hypertrophy",
+        exercises: [
+          { name: "Incline Barbell Bench", sets: "3 sets × 8 reps", rest: "2 min" },
+          { name: "Flat DB Dumbbell Press", sets: "3 sets × 10 reps", rest: "90 sec" },
+          { name: "Cable Lateral Raises", sets: "4 sets × 15 reps", rest: "60 sec" },
+          { name: "Cable Pec Flyes", sets: "3 sets × 12 reps", rest: "60 sec" },
+          { name: "Lying Skull Crushers", sets: "3 sets × 12 reps", rest: "60 sec" }
+        ]
+      },
+      pullB: {
+        title: "Pull B — Posterior Chain & Horizontal Row",
+        exercises: [
+          { name: "Conventional Deadlift", sets: "3 sets × 5 reps", rest: "3 min" },
+          { name: "Chest-Supported Row", sets: "3 sets × 10 reps", rest: "90 sec" },
+          { name: "Close-Grip Pulldown", sets: "3 sets × 10 reps", rest: "90 sec" },
+          { name: "Rear Delt Dumbbell Fly", sets: "4 sets × 15 reps", rest: "60 sec" },
+          { name: "Hammer Curls", sets: "3 sets × 12 reps", rest: "60 sec" }
+        ]
+      },
+      legsB: {
+        title: "Legs B — Hamstring & Glute Focus",
+        exercises: [
+          { name: "Bulgarian Split Squats", sets: "3 sets × 10 reps/leg", rest: "90 sec" },
+          { name: "Leg Extensions", sets: "3 sets × 15 reps", rest: "60 sec" },
+          { name: "Seated Hamstring Curls", sets: "3 sets × 12 reps", rest: "60 sec" },
+          { name: "Walking DB Lunges", sets: "3 sets × 12 reps", rest: "60 sec" },
+          { name: "Seated Calf Raises", sets: "4 sets × 15 reps", rest: "45 sec" }
+        ]
+      }
+    };
+
+    // Navigation Switcher
+    function navigate(view, btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      
+      btn.classList.add('active');
+      document.getElementById(`view-${view}`).classList.add('active');
+    }
+
+    // Workout Switcher
+    function switchSplit(key, chip) {
+      document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderWorkout(key);
+    }
+
+    function renderWorkout(key) {
+      const data = workoutDatabase[key];
+      document.getElementById('split-title').innerText = data.title;
+      document.getElementById('workout-day-badge').innerText = key.toUpperCase();
+      
+      let html = '';
+      data.exercises.forEach(ex => {
+        html += `
+          <div class="exercise-card">
+            <div class="exercise-info">
+              <h4>${ex.name}</h4>
+              <p>${ex.sets}</p>
+            </div>
+            <div class="rest-tag">${ex.rest}</div>
+          </div>
+        `;
+      });
+      document.getElementById('exercise-list').innerHTML = html;
+    }
+
+    // Macro Tracking Engine with Local Persistence
+    let state = {
+      water: 0.0,
+      calories: 0,
+      protein: 0
+    };
+
+    function updateDisplays() {
+      document.getElementById('disp-water').innerText = `${state.water.toFixed(2)}L`;
+      document.getElementById('disp-calories').innerText = `${state.calories}`;
+      document.getElementById('disp-protein').innerText = `${state.protein}g`;
+    }
+
+    function addWater(amount) {
+      state.water = Math.round((state.water + amount) * 100) / 100;
+      updateDisplays();
+      persistData();
+    }
+
+    function addProtein(amount) {
+      state.protein += amount;
+      updateDisplays();
+      persistData();
+    }
+
+    function resetMacros() {
+      state = { water: 0.0, calories: 0, protein: 0 };
+      updateDisplays();
+      persistData();
+    }
+
+    function saveDay() {
+      const calIn = parseInt(document.getElementById('in-cal').value);
+      const proIn = parseInt(document.getElementById('in-pro').value);
+      const watIn = parseFloat(document.getElementById('in-water').value);
+
+      if (!isNaN(calIn)) state.calories += calIn;
+      if (!isNaN(proIn)) state.protein += proIn;
+      if (!isNaN(watIn)) state.water = Math.round((state.water + watIn) * 100) / 100;
+
+      document.getElementById('in-cal').value = '';
+      document.getElementById('in-pro').value = '';
+      document.getElementById('in-water').value = '';
+
+      updateDisplays();
+      persistData();
+      alert("Intake saved successfully!");
+    }
+
+    function persistData() {
+      localStorage.setItem('recomp_state', JSON.stringify(state));
+    }
+
+    function loadPersistedData() {
+      const saved = localStorage.getItem('recomp_state');
+      if (saved) {
+        state = JSON.parse(saved);
+        updateDisplays();
+      }
+    }
+  </script>
+</body>
+</html>
